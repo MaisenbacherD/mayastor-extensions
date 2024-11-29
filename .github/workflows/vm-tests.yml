@@ -1,0 +1,26 @@
+name: vm tests
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+    types: ['opened', 'edited', 'reopened', 'synchronize']
+
+jobs:
+  vm-tests:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v11
+        with:
+          kvm: true
+      - uses: DeterminateSystems/magic-nix-cache-action@v6
+      - name: Pre-populate nix-shell
+        run: |
+          export NIX_PATH=nixpkgs=$(jq '.nixpkgs.url' nix/sources.json -r)
+          echo "NIX_PATH=$NIX_PATH" >> $GITHUB_ENV
+          #nix-shell ./scripts/k8s/shell.nix --run "echo"
+      - name: Test on VM
+        run: |
+          #nix-shell ./scripts/k8s/shell.nix --run "cd chart; helm dependency update"
+          #nix-shell ./scripts/k8s/shell.nix --run "echo 'DENNIS TEST'"
+          nix-build ./tests/helm/test.nix --option sandbox false

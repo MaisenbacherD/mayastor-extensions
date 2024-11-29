@@ -53,6 +53,9 @@ pkgs.nixosTest {
   testScript = ''
     machine.wait_for_unit("default.target")
 
+    machine.succeed("echo 'DENNIS DEBUG'")
+    machine.shell_interact("ls /dev/")
+    machine.succeed("ls /dev/")
     machine.succeed("${test-src}/scripts/k8s/deployer.sh start --label")
     machine.succeed("${test-src}/scripts/helm/install.sh --wait")
     machine.succeed("kubectl get pods -A -o wide 1>&2")
